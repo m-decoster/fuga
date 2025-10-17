@@ -12,7 +12,7 @@ For example, you could launch an application with a camera process and a control
 fugactl application MyRobotApp restart Logic
 ```
 
-Use Fuga at your own risk - we're not responsible for messing up your system or hardware-related damage. The code is fully open-source and we're open to pull requests and audits of the code.
+Fuga is work in progress software. Use it at your own risk: we're not responsible for messing up your system or hardware-related damage. The code is fully open-source and we're open to pull requests and audits of the code.
 
 ## Concepts
 
@@ -53,6 +53,13 @@ The installation script will prompt you to start the daemon.
 ## Usage
 
 Run `fugactl --help` to list available commands.
+
+## Why not ROS/roslaunch?
+
+We aim for a simple, non-viral development set-up. Your "nodes" don't need to know about Fuga. You can use any inter-process communication framework you want.
+There's no need for building packages with a build tool like colcon, and you can use any programming language for any node, as you see fit.
+
+✊ This lowers the barrier to entry for robotics software and gives freedom to the developer to use the technologies that fits their needs.
 
 ## What's a fuga?
 
