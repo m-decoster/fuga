@@ -39,6 +39,8 @@ For now, you'll need to build from source:
 cargo build --release
 ```
 
+This requires that [Rust and Cargo are installed](https://rustup.rs/).
+
 Then, run:
 
 ```sh
