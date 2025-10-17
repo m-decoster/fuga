@@ -61,3 +61,14 @@ Fuga (pronounced something like *fooga*) is Dutch for [fugue](https://en.wikiped
 ## Citation
 
 If you use Fuga in the context of academic research, please consider citing us. See `CITATION.cff`.
+
+```bibtex
+@software{De_Coster_Fuga_an_orchestrator_2025,
+    author = {De Coster, Mathieu},
+    month = nov,
+    title = {{Fuga: an orchestrator for multi-process robotics applications}},
+    url = {https://github.com/m-decoster/fuga},
+    version = {0.1.0},
+    year = {2025}
+}
+```
