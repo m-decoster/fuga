@@ -53,3 +53,11 @@ The installation script will prompt you to start the daemon.
 ## Usage
 
 Run `fugactl --help` to list available commands.
+
+## What's a fuga?
+
+Fuga (pronounced something like *fooga*) is Dutch for [fugue](https://en.wikipedia.org/wiki/Fugue), a type of polyphonic musical composition (i.e., with multiple voices being interwoven).
+
+## Citation
+
+If you use Fuga in the context of academic research, please consider citing us. See `CITATION.cff`.

@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software in publications, please cite it as below."
+authors:
+- family-names: "De Coster"
+  given-names: "Mathieu"
+title: "Fuga: an orchestrator for multi-process robotics applications"
+url: "https://github.com/m-decoster/fuga"
+date-released: 2025-11-01
+version: 0.1.0
