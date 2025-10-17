@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
-
-mod launch;
+use fuga::application::Application;
 
 /// Fuga: An orchestrator for multi-process applications
 #[derive(Parser, Debug)]
@@ -57,7 +56,7 @@ fn main() {
 
     match &cli.command {
         Commands::Start { launch_file } => {
-            let launch_file = launch::LaunchFile::from_file(launch_file);
+            let launch_file = Application::from_file(launch_file);
             if let Ok(lf) = launch_file {
                 println!("Launching application: {}", lf.name);
                 lf.launch_all().unwrap_or_else(|err| {
