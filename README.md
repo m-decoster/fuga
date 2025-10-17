@@ -1,0 +1,55 @@
+# Fuga
+
+🎵 Fuga is an orchestrator for multi-process applications. It was created out of a need to have a simple system for launching applications that require multiple processes to run in parallel, with easy status monitoring, and manual and automatic stopping and restarting of processes.
+
+It was created in the context of writing software for robotics.
+- Robotics software requires many systems to run in parallel ([Concurrency versus parallellism](https://stackoverflow.com/a/1050257)). For example, your camera might get frames at 15 Hz and your motion planner should compute trajectories as fast as possible, but your control loop must execute at 100 Hz without being delayed by the camera or motion planner.
+- Some of these processes are slow to start (e.g., connecting to a camera or a robot can take several seconds.) We support rapid iteration during development by allowing you to keep certain processes running and only restart your main control loop.
+
+For example, you could launch an application with a camera process and a control loop, and restart the control loop after you've altered some logic:
+```sh
+# ... assumes the application was launched already...
+fugactl application MyRobotApp restart Logic
+```
+
+Use Fuga at your own risk - we're not responsible for messing up your system or hardware-related damage. The code is fully open-source and we're open to pull requests and audits of the code.
+
+## Concepts
+
+There are two applications that you should know about:
+- `fugad` is a daemon that monitors running applications.
+- `fugactl` is a CLI for launching and monitoring applications.
+
+Fuga launches *applications*, which consist of one or more *processes*.
+Processes can define a restarting policy, which determines if the process should restart, in which case (failure or always) and, optionally, after a delay.
+
+When you run `fugactl start launch_file.toml`, `fugactl` will start all processes defined by the launch file and notify `fugad` of running processes by forwarding:
+- The name of the application (defined in the launch file)
+- The name and PID of each subprocess
+
+Processes are launched as the user running `fugactl`.
+
+## Installation
+
+Note that Fuga requires [systemd](https://systemd.io/), which comes pre-installed on modern Ubuntu systems.
+
+For now, you'll need to build from source:
+
+```sh
+cargo build --release
+```
+
+Then, run:
+
+```sh
+sudo ./installation/install_fugad.sh
+```
+
+to install `fugad` and `fugactl` under `/usr/local/bin`.
+
+A service file (`./installation/packaging/fugad.service`) will also be installed.
+The installation script will prompt you to start the daemon.
+
+## Usage
+
+Run `fugactl --help` to list available commands.
