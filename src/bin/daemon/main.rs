@@ -20,10 +20,15 @@ const RUN_DIR: &str = "/run/fuga";
 /// Returns:
 ///    A Result indicating success or failure.
 async fn handle_client(mut stream: UnixStream) -> std::io::Result<()> {
-    let mut buf = vec![0; 1024];
-    let n = stream.read(&mut buf).await?;
-    let cmd = String::from_utf8_lossy(&buf[..n]);
+    let mut buf = [0u8; 8];
+    stream.read_exact(&mut buf).await?;
+    let payload_length = usize::from_le_bytes(len_buf);
+    buf = vec![0u8; payload_length];
+    stream.read_exact(&mut buf).await?;
+    let application = bincode::deserialize(buf)?;
     println!("Received: {}", cmd);
+
+    // TODO asynchronously launch all processes, and stream responses.
 
     // respond with a placeholder JSON
     stream.write_all(b"{\"status\": \"ok\"}\n").await?;

@@ -1,3 +1,5 @@
+//! Representation of applications as they are parsed by the client and processed by the daemon.
+
 /// Representation of an Application to be launched.
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Application {
