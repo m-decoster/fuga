@@ -17,8 +17,8 @@ struct Cli {
 enum Commands {
     /// Start an application.
     Start {
-        /// Path to the launch file.
-        launch_file: String
+        /// Path to the application file.
+        application: String
     },
     /// Get the status of an application.
     Status {
@@ -55,16 +55,13 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Start { launch_file } => {
-            let launch_file = Application::from_file(launch_file);
-            if let Ok(lf) = launch_file {
-                println!("Launching application: {}", lf.name);
-                lf.launch_all().unwrap_or_else(|err| {
-                    eprintln!("Error launching applications: {}", err);
-                });
-                // TODO: notify daemon of application name, and the name-PID mapping per sub-process.
+        Commands::Start { application } => {
+            let application = Application::from_file(application);
+            if let Ok(lf) = application {
+                println!("Launching application: {}", lf.name());
+                // TODO: send application to daemon.
             } else {
-                eprintln!("Failed to read launch file: {}", launch_file.err().unwrap());
+                eprintln!("Failed to read launch file: {}", application.err().unwrap());
             }
         },
         Commands::Status { name } => {

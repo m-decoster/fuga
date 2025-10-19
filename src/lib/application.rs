@@ -2,12 +2,20 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Application {
     /// Name of the application.
-    pub name: String,
+    name: String,
     /// List of processes to be launched.
-    pub processes: Vec<Process>,
+    processes: Vec<Process>,
 }
 
 impl Application {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn processes(&self) -> &[Process] {
+        &self.processes
+    }
+
     /// Parse a launch file from a string.
     ///
     /// Args:
@@ -19,28 +27,18 @@ impl Application {
         toml::from_str(toml_str)
     }
 
-    /// Parse a launch file from a file path.
+    /// Parse an application file from a file path.
     ///
     /// Args:
-    ///    file_path: The path to the launch file.
+    ///    file_path: The path to the application file.
     ///
     /// Returns:
     ///     Ok(Application) if parsing is successful, Err(String) with an error otherwise.
     pub fn from_file(file_path: &str) -> Result<Self, String> {
         let content = std::fs::read_to_string(file_path)
-            .map_err(|e| format!("Failed to read launch file: {}", e))?;
+            .map_err(|e| format!("Failed to read application file: {}", e))?;
         Self::from_str(&content)
-            .map_err(|e| format!("Failed to parse launch file: {}", e))
-    }
-
-    pub fn launch_all(&self) -> Result<(), String> {
-        // Placeholder for actual launching logic.
-        println!("Launching all applications for '{}'", self.name);
-        for process in &self.processes {
-            println!("Launching application: {}", process.name);
-            // Here you would add the logic to actually launch the process.
-        }
-        Ok(())
+            .map_err(|e| format!("Failed to parse application file: {}", e))
     }
 }
 
@@ -48,15 +46,37 @@ impl Application {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Process {
     /// A unique name for the process.
-    pub name: String,
+    name: String,
     /// Command to start the process.
-    pub command: String,
+    command: String,
     /// Arguments to pass to the process.
-    pub args: Vec<String>,
+    args: Vec<String>,
     /// Whether the process should be restarted. If None, defaults to Restart::Never.
-    pub restart: Option<Restart>,
+    restart: Option<Restart>,
     /// How long to wait before restarting the process. If None, defaults to 0 (immediate restart).
-    pub restart_delay_secs: Option<f32>,
+    restart_delay_secs: Option<f32>,
+}
+
+impl Process {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn command(&self) -> &str {
+        &self.command
+    }
+
+    pub fn args(&self) -> &[String] {
+        &self.args
+    }
+
+    pub fn restart(&self) -> &Option<Restart> {
+        &self.restart
+    }
+
+    pub fn restart_delay_secs(&self) -> &Option<f32> {
+        &self.restart_delay_secs
+    }
 }
 
 /// When to restart a process.
