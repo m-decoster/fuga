@@ -35,7 +35,55 @@ This requires that [Rust and Cargo are installed](https://rustup.rs/).
 
 ## Usage
 
-Run `fuga --help` to list available commands. When you start the application, you'll see available shortcuts right there in the UI.
+Run `fuga --help` for available arguments. When you start an application, you'll see available commands right there in the UI.
+
+### Controlling the TUI
+
+Fuga's UI has two tabs. On the left, you can see the process table. It contains all of the processes of your application, their process IDs, and their current status.
+You can scroll through these using the arrow keys (up/down) or j and k.
+
+On the right, there's the log tab. If you press the l (lowercase L) key, you'll show the logs for the currently highlighted process in this tab.
+By pressing n, you can swap to the logs tab to scroll through these logs. Press n to return focus to the process tab.
+
+You can (re)start a process using the r key, and stop it using the s key. Quit the application - killing all child processes - using q.
+
+Fuga can also redirect logs to files, which may be useful if you want to monitor all processes at once, with `tail -f $LOGFILE`.
+
+### Application files
+
+The application file format is based on TOML. Here's an example showing all available fields:
+
+```toml
+name = "MyApp"
+
+[env]
+RERUN_RECORDING_ID="ab0a9772-cf9e-466b-a3e5-fd638d2e0ce2"
+
+[[processes]]
+name = "Rerun"
+command = "uv"
+args = ["run", "rerun", "--hide-welcome-screen"]
+work_dir = "camera"
+restart = "never"
+
+[[processes]]
+name = "Camera"
+command = "uv"
+args = ["run", "python", "camera.py"]
+work_dir = "camera"
+restart = "on-failure"
+restart_delay_secs = 1.0
+
+[[processes]]
+name = "Ping"
+command = "ping"
+args = ["google.com"]
+restart = "never"
+```
+
+You can set environment variables under the `[env]` header.
+
+You can add individual processes under the `[[processes]]` headers. You can choose to automatically restart processes (after an optional delay), set the working directory in which the programs are to be launched, and provide an alias (name) for easy reference to the process in Fuga.
 
 ## Why not...
 
