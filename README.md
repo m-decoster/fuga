@@ -12,7 +12,7 @@ You supply your application requirements as a [TOML](https://toml.io/en/) file, 
 
 This makes the development of robotics applications smoother: you can hot-reload processes or stop problematic ones without ever leaving the terminal.
 
-Once your application is ready for deployment, Fuga also has a Daemon mode (Note: this is not yet implemented, but it is on the roadmap). In the Daemon mode, Fuga will launch your application without starting the interactive UI.
+Once your application is ready for deployment, Fuga also has a daemon mode (Note: this is not yet implemented, but it is on the roadmap). In the daemon mode, Fuga will launch your application without starting the interactive UI. Processes that crash can automatically be restarted if so desired, boosting the reliability of your robot.
 
 For example, you could launch an application with a camera process and a control loop, and restart the control loop after you've altered some logic. It's as simple as this:
 ```sh
@@ -23,24 +23,7 @@ TODO Screenshot goes here.
 
 Fuga is work in progress software. Use it at your own risk: we're not responsible for messing up your system or hardware-related damage. The code is fully open-source and we're open to pull requests and audits of the code.
 
-## Concepts
-
-There are two applications that you should know about:
-- `fugad` is a daemon that monitors running applications.
-- `fugactl` is a CLI for launching and monitoring applications.
-
-Fuga launches *applications*, which consist of one or more *processes*.
-Processes can define a restarting policy, which determines if the process should restart, in which case (failure or always) and, optionally, after a delay.
-
-When you run `fugactl start launch_file.toml`, `fugactl` will start all processes defined by the launch file and notify `fugad` of running processes by forwarding:
-- The name of the application (defined in the launch file)
-- The name and PID of each subprocess
-
-Processes are launched as the user running `fugactl`.
-
 ## Installation
-
-Note that Fuga requires [systemd](https://systemd.io/), which comes pre-installed on modern Ubuntu systems.
 
 For now, you'll need to build from source:
 
@@ -50,20 +33,9 @@ cargo build --release
 
 This requires that [Rust and Cargo are installed](https://rustup.rs/).
 
-Then, run:
-
-```sh
-sudo ./installation/install_fugad.sh
-```
-
-to install `fugad` and `fugactl` under `/usr/local/bin`.
-
-A service file (`./installation/packaging/fugad.service`) will also be installed.
-The installation script will prompt you to start the daemon.
-
 ## Usage
 
-Run `fugactl --help` to list available commands.
+Run `fuga --help` to list available commands. When you start the application, you'll see available shortcuts right there in the UI.
 
 ## Why not...
 
