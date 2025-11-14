@@ -78,12 +78,12 @@ restart_delay_secs = 1.0
 name = "Ping"
 command = "ping"
 args = ["google.com"]
-restart = "never"
+restart = "always"
 ```
 
 You can set environment variables under the `[env]` header.
 
-You can add individual processes under the `[[processes]]` headers. You can choose to automatically restart processes (after an optional delay), set the working directory in which the programs are to be launched, and provide an alias (name) for easy reference to the process in Fuga.
+You can add individual processes under the `[[processes]]` headers. You can choose to automatically restart processes (after an optional delay) - the default is "never", set the working directory in which the programs are to be launched, and provide an alias (name) for easy reference to the process in Fuga.
 
 ## Why not...
 
