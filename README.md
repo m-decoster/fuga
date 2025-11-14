@@ -19,7 +19,7 @@ For example, you could launch an application with a camera process and a control
 fuga MyRobotApp.toml
 ```
 
-TODO Screenshot goes here.
+![[tui.png]]
 
 Fuga is work in progress software. Use it at your own risk: we're not responsible for messing up your system or hardware-related damage. The code is fully open-source and we're open to pull requests and audits of the code.
 
