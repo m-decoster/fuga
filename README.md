@@ -1,8 +1,8 @@
 # Fuga
 
 🎵 Fuga is a tool for launching, monitoring, and managing multi-process applications. Think of it as a simpler version of docker-compose, without docker. Fuga was created in the context of writing software for robotics.
-- Robotics software requires many systems to run in parallel ([Concurrency versus parallellism](https://stackoverflow.com/a/1050257)). For example, your camera might get frames at 15 Hz and your motion planner should compute trajectories as fast as possible, but your control loop must execute at 100 Hz without being delayed by the camera or motion planner.
-- Some of these processes are slow to start (e.g., connecting to a camera or a robot can take several seconds.) Fuga supports rapid iteration during development by allowing you to keep certain processes running and only restart your main control loop.
+- Robotics software requires many systems to run in parallel ([Concurrency versus parallellism](https://stackoverflow.com/a/1050257)). For example, your camera might get frames at 15 Hz and your motion planner should compute trajectories as fast as possible, but your control loop must execute at 100 Hz without being delayed by the camera or motion planner. This implies that you need multiple processes.
+- Some of these processes are slow to start (e.g., connecting to a camera or a robot can take several seconds.) Fuga supports rapid iteration during development by allowing you to keep certain processes running and only restart your main control loop (for instance.)
 - Writing robotics software is already complex. Tooling should make your life easier, not harder.
 
 You supply your application requirements as a [TOML](https://toml.io/en/) file, and Fuga opens a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) that allows you to monitor and control processes. This includes:
