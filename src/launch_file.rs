@@ -1,21 +1,17 @@
+use std::collections::HashMap;
+
 /// Representation of an Application to be launched.
 #[derive(serde::Serialize, serde::Deserialize)]
-pub struct Application {
+pub struct LaunchFile {
     /// Name of the application.
-    name: String,
+    pub name: String,
+    /// Environment variables.
+    pub env: Option<HashMap<String, String>>,
     /// List of processes to be launched.
-    processes: Vec<Process>,
+    pub processes: Vec<ProcessDescription>,
 }
 
-impl Application {
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn processes(&self) -> &[Process] {
-        &self.processes
-    }
-
+impl LaunchFile {
     /// Parse a launch file from a string.
     ///
     /// Args:
@@ -23,64 +19,50 @@ impl Application {
     ///
     /// Returns:
     ///     Ok(Application) if parsing is successful, Err(toml::de::Error) otherwise.
-    pub fn from_str(toml_str: &str) -> Result<Self, toml::de::Error> {
+    pub fn from_str(toml_str: &str) -> std::io::Result<Self> {
         toml::from_str(toml_str)
+            .map_err(|e| std::io::Error::other(format!("Error parsing TOML file: {}", e.message())))
     }
 
-    /// Parse an application file from a file path.
+    /// Parses a launch file from a file path.
     ///
     /// Args:
-    ///    file_path: The path to the application file.
+    ///    file_path: The path to the launch file.
     ///
     /// Returns:
-    ///     Ok(Application) if parsing is successful, Err(String) with an error otherwise.
-    pub fn from_file(file_path: &str) -> Result<Self, String> {
-        let content = std::fs::read_to_string(file_path)
-            .map_err(|e| format!("Failed to read application file: {}", e))?;
+    ///     Ok(Application) if parsing is successful.
+    pub fn from_file(file_path: &str) -> std::io::Result<Self> {
+        let content = std::fs::read_to_string(file_path)?;
         Self::from_str(&content)
-            .map_err(|e| format!("Failed to parse application file: {}", e))
     }
 }
 
 /// Representation of a process to be launched.
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct Process {
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct ProcessDescription {
     /// A unique name for the process.
-    name: String,
+    pub name: String,
     /// Command to start the process.
-    command: String,
+    pub command: String,
+    /// Working directory, in which the process is to be launched.
+    /// Defaults to the current working directory.
+    pub work_dir: Option<String>,
     /// Arguments to pass to the process.
-    args: Vec<String>,
+    pub args: Vec<String>,
     /// Whether the process should be restarted. If None, defaults to Restart::Never.
-    restart: Option<Restart>,
+    pub restart: Option<Restart>,
     /// How long to wait before restarting the process. If None, defaults to 0 (immediate restart).
-    restart_delay_secs: Option<f32>,
-}
-
-impl Process {
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn command(&self) -> &str {
-        &self.command
-    }
-
-    pub fn args(&self) -> &[String] {
-        &self.args
-    }
-
-    pub fn restart(&self) -> &Option<Restart> {
-        &self.restart
-    }
-
-    pub fn restart_delay_secs(&self) -> &Option<f32> {
-        &self.restart_delay_secs
-    }
+    pub restart_delay_secs: Option<f32>,
+    /// File to which stdout will be written.
+    /// When this value is empty, no file will be written.
+    pub log_file_out: Option<String>,
+    /// File to which stderr will be written.
+    /// When this value is empty, no file will be written.
+    pub log_file_err: Option<String>,
 }
 
 /// When to restart a process.
-#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Restart {
     /// When the process exited with a non-zero status.
     #[serde(rename = "on-failure")]
@@ -90,7 +72,7 @@ pub enum Restart {
     Always,
     /// Never restart the process.
     #[serde(rename = "never")]
-    Never
+    Never,
 }
 
 #[cfg(test)]
@@ -101,21 +83,21 @@ mod tests {
     fn test_parse_launch_file() {
         let toml_str = r#"
             name = "MyApp"
-            
+
             [[processes]]
             name = "App1"
             command = "python"
             args = ["app1.py"]
             restart = "always"
             restart_delay_secs = 5.0
-            
+
             [[processes]]
             name = "App2"
             command = "node"
             args = ["app2.js"]
             restart = "never"
         "#;
-        let launch_file: Application = toml::from_str(toml_str).unwrap();
+        let launch_file: LaunchFile = toml::from_str(toml_str).unwrap();
         assert_eq!(launch_file.name, "MyApp");
         assert_eq!(launch_file.processes.len(), 2);
         assert_eq!(launch_file.processes[0].name, "App1");

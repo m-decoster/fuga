@@ -1,0 +1,24 @@
+name = "MyApp"
+
+[env]
+RERUN_RECORDING_ID="ab0a9772-cf9e-466b-a3e5-fd638d2e0ce2"
+
+[[processes]]
+name = "Rerun"
+command = "uv"
+args = ["run", "rerun", "--hide-welcome-screen"]
+work_dir = "camera"
+restart = "never"
+
+[[processes]]
+name = "Camera"
+command = "uv"
+args = ["run", "python", "camera.py"]
+work_dir = "camera"
+restart = "never"
+
+[[processes]]
+name = "Ping"
+command = "ping"
+args = ["google.com"]
+restart = "never"
