@@ -9,6 +9,8 @@ command = "uv"
 args = ["run", "rerun", "--hide-welcome-screen"]
 work_dir = "camera"
 restart = "never"
+log_file_out = "logs/rerun.out"
+log_file_err = "logs/rerun.err"
 
 [[processes]]
 name = "Camera"
@@ -22,3 +24,5 @@ name = "Ping"
 command = "ping"
 args = ["google.com"]
 restart = "never"
+log_file_out = "logs/ping.out"
+log_file_err = "logs/ping.err"

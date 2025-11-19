@@ -58,7 +58,7 @@ async fn main() -> io::Result<()> {
 
     let launch_file = LaunchFile::from_file(&cli.launch_file)?;
 
-    let mut supervisor = Supervisor::from_launch_file(launch_file);
+    let mut supervisor = Supervisor::from_launch_file(launch_file).await;
 
     let app = App::new(&mut supervisor);
     let result = app.run(terminal).await;

@@ -1,7 +1,10 @@
 use futures::future::join_all;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
+use std::path::Path;
 use std::{collections::HashMap, sync::Arc, time::Duration};
+use tokio::fs::{self, OpenOptions};
+use tokio::io::AsyncWriteExt;
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
@@ -82,7 +85,10 @@ impl ChildProcess {
     /// # Arguments
     /// - `process_description` - A description of the process to be spawned.
     /// - `env` - A map containing environment variables to be set.
-    pub fn spawn(process_description: ProcessDescription, env: &HashMap<String, String>) -> Self {
+    pub async fn spawn(
+        process_description: ProcessDescription,
+        env: &HashMap<String, String>,
+    ) -> Self {
         let child_result = Command::new(process_description.command.clone())
             .args(process_description.args.clone())
             .envs(env)
@@ -95,6 +101,26 @@ impl ChildProcess {
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped())
             .spawn();
+
+        if let Some(ref out_file) = process_description.log_file_out {
+            let path = Path::new(out_file);
+            if let Some(path) = path.parent() {
+                match fs::create_dir_all(path).await {
+                    Ok(_) => {}
+                    Err(_) => {}
+                }
+            }
+        }
+
+        if let Some(ref err_file) = process_description.log_file_err {
+            let path = Path::new(err_file);
+            if let Some(path) = path.parent() {
+                match fs::create_dir_all(path).await {
+                    Ok(_) => {}
+                    Err(_) => {}
+                }
+            }
+        }
 
         if let Err(e) = child_result {
             Self {
@@ -111,14 +137,35 @@ impl ChildProcess {
 
             let log_lines = Arc::new(Mutex::new(Vec::new()));
 
+            let log_file_out = process_description.log_file_out.clone();
+            let log_file_err = process_description.log_file_err.clone();
+
             // Spawn stdout logger
             {
                 let logs = log_lines.clone();
                 tokio::spawn(async move {
                     let mut reader = BufReader::new(stdout).lines();
+
+                    let mut out_file = if let Some(out_file_path) = log_file_out {
+                        OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(out_file_path)
+                            .await
+                            .ok()
+                    } else {
+                        None
+                    };
+
                     while let Ok(Some(line)) = reader.next_line().await {
                         let mut l = logs.lock().await;
                         l.push(format!("[OUT] {}", line));
+
+                        if let Some(ref mut f) = out_file {
+                            if let Err(e) = f.write_all(format!("{}\n", line).as_bytes()).await {
+                                l.push(format!("[ERR] {}", e));
+                            }
+                        }
                     }
                 });
             }
@@ -128,9 +175,27 @@ impl ChildProcess {
                 let logs = log_lines.clone();
                 tokio::spawn(async move {
                     let mut reader = BufReader::new(stderr).lines();
+
+                    let mut err_file = if let Some(err_file_path) = log_file_err {
+                        OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(err_file_path)
+                            .await
+                            .ok()
+                    } else {
+                        None
+                    };
+
                     while let Ok(Some(line)) = reader.next_line().await {
                         let mut l = logs.lock().await;
                         l.push(format!("[ERR] {}", line));
+
+                        if let Some(ref mut f) = err_file {
+                            if let Err(e) = f.write_all(format!("{}\n", line).as_bytes()).await {
+                                l.push(format!("[ERR] {}", e));
+                            }
+                        }
                     }
                 });
             }
@@ -199,7 +264,7 @@ impl ChildProcess {
     /// The new child process.
     async fn restart(&mut self, env: &HashMap<String, String>) {
         self.kill().await;
-        *self = ChildProcess::spawn(self.description.clone(), env);
+        *self = ChildProcess::spawn(self.description.clone(), env).await;
     }
 }
 
@@ -218,11 +283,11 @@ impl Supervisor {
     ///
     /// # Arguments
     /// - `launch_file` - A launch file.
-    pub fn from_launch_file(launch_file: LaunchFile) -> Self {
+    pub async fn from_launch_file(launch_file: LaunchFile) -> Self {
         let env = launch_file.env.unwrap_or_default();
         let mut children = Vec::new();
         for process_description in launch_file.processes {
-            children.push(ChildProcess::spawn(process_description, &env));
+            children.push(ChildProcess::spawn(process_description, &env).await);
         }
         Self {
             name: launch_file.name,
