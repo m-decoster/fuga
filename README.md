@@ -96,7 +96,13 @@ There's no need for building packages with a build tool like colcon, and you can
 
 ### Supervisord?
 
-Supervisord is great, too complex for our use cases. For many cases, you don't need the amount of configuration it allows. Additionally, Fuga only has a single binary and allows for interactive control, improving the user experience.
+Supervisord is great, but too complex for our use cases. For many cases, you don't need the amount of configuration it allows. Additionally, Fuga only has a single binary and allows for interactive control, improving the user experience.
+
+### Systemd?
+
+Systemd seems like a perfect fit. It could be perfect for deployment, where your robot _is_ the system. But during development, we want more control (and possibly conflicting services for multiple people developing on the same robot). Fuga is more interactive and compartmentalized.
+
+For deployment, you can always consider rewriting your Fuga launch file as services and/or targets for systemd.
 
 ## What's a fuga?
 
