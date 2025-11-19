@@ -91,6 +91,8 @@ impl<'a> App<'a> {
 
     /// Collects the latest state from the supervisor.
     async fn gather_state(&mut self) {
+        self.app_state.supervisor.restart_stopped_processes().await;
+
         self.app_state.latest_process_states =
             join_all(self.app_state.supervisor.child_iter().map(async |child| {
                 let process_description = child.description();

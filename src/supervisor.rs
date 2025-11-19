@@ -12,7 +12,7 @@ use tokio::{
     time::sleep,
 };
 
-use crate::launch_file::{LaunchFile, ProcessDescription};
+use crate::launch_file::{LaunchFile, ProcessDescription, Restart};
 
 /// The current status of a child process.
 #[derive(Debug, Clone, Copy, Default)]
@@ -150,7 +150,7 @@ impl ChildProcess {
                         OpenOptions::new()
                             .create(true)
                             .append(true)
-                            .open(out_file_path)
+                            .open(format!("{}.{}", out_file_path, chrono::prelude::Utc::now()))
                             .await
                             .ok()
                     } else {
@@ -180,7 +180,7 @@ impl ChildProcess {
                         OpenOptions::new()
                             .create(true)
                             .append(true)
-                            .open(err_file_path)
+                            .open(format!("{}.{}", err_file_path, chrono::prelude::Utc::now()))
                             .await
                             .ok()
                     } else {
@@ -289,6 +289,7 @@ impl Supervisor {
         for process_description in launch_file.processes {
             children.push(ChildProcess::spawn(process_description, &env).await);
         }
+
         Self {
             name: launch_file.name,
             children,
@@ -345,6 +346,38 @@ impl Supervisor {
     pub async fn restart(&mut self, process_index: usize) {
         if let Some(child) = self.children.get_mut(process_index) {
             child.restart(&self.env).await;
+        }
+    }
+
+    /// Restarts all stopped processes that want to be started.
+    pub async fn restart_stopped_processes(&mut self) {
+        for child in &mut self.children {
+            match &child.description().restart {
+                Some(Restart::Always) => match child.status.clone().lock().await.clone() {
+                    ProcessStatus::Running => {}
+                    _ => {
+                        tokio::time::sleep(Duration::from_secs_f32(
+                            child.description().restart_delay_secs.unwrap_or_default(),
+                        ))
+                        .await;
+
+                        child.restart(&self.env).await;
+                    }
+                },
+                Some(Restart::OnFailure) => match child.status.clone().lock().await.clone() {
+                    ProcessStatus::Error => {
+                        tokio::time::sleep(Duration::from_secs_f32(
+                            child.description().restart_delay_secs.unwrap_or_default(),
+                        ))
+                        .await;
+
+                        child.restart(&self.env).await;
+                    }
+                    _ => {}
+                },
+                Some(Restart::Never) => {}
+                None => {}
+            }
         }
     }
 }
