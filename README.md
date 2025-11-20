@@ -102,6 +102,8 @@ Supervisord is great, but too complex for our use cases. For many cases, you don
 
 Systemd seems like a perfect fit. It could be perfect for deployment, where your robot _is_ the system. But during development, we want more control (and possibly conflicting services for multiple people developing on the same robot). Fuga is more interactive and compartmentalized.
 
+Systemd also does not support graphical applications. Fuga does. You'll probably run those during development.
+
 For deployment, you can always consider rewriting your Fuga launch file as services and/or targets for systemd.
 
 ## What's a fuga?
