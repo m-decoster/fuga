@@ -13,32 +13,7 @@ use tokio::{
 };
 
 use crate::launch_file::{LaunchFile, ProcessDescription, Restart};
-
-/// The current status of a child process.
-#[derive(Debug, Clone, Copy, Default)]
-pub enum ProcessStatus {
-    /// The process has not yet been started.
-    #[default]
-    Idle,
-    /// The process is currently running.
-    Running,
-    /// The process was stopped by the user (through the UI).
-    Stopped,
-    /// The process exited with a zero exit code.
-    Success,
-    /// The process exited with a non-zero exit code.
-    Error,
-}
-
-impl From<Option<i32>> for ProcessStatus {
-    fn from(code: Option<i32>) -> Self {
-        match code {
-            Some(0) => ProcessStatus::Success,
-            Some(_) => ProcessStatus::Error,
-            None => ProcessStatus::Stopped,
-        }
-    }
-}
+use crate::process::ProcessStatus;
 
 /// A child process.
 #[derive(Debug)]

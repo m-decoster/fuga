@@ -9,7 +9,8 @@ use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, Cell, Paragraph, Row, Table, TableState, Wrap};
 use ratatui::{DefaultTerminal, Frame};
 
-use crate::supervisor::{ProcessStatus, Supervisor};
+use crate::process::ProcessStatus;
+use crate::supervisor::Supervisor;
 
 /// The UI component that has focus.
 #[derive(Debug, Clone, Copy)]

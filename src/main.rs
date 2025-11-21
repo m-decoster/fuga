@@ -11,15 +11,14 @@ use ratatui::crossterm::{
 
 /// Configuration of applications as TOML files.
 mod launch_file;
+/// Process spawning.
+mod process;
 /// Process supervision and management.
 mod supervisor;
 /// Text-based user interface.
 mod tui;
 
-use launch_file::LaunchFile;
-use tui::App;
 
-use crate::supervisor::Supervisor;
 
 /// Fuga: A monitor for multi-process applications
 #[derive(Parser, Debug)]
@@ -48,22 +47,27 @@ pub fn restore_tui() -> io::Result<()> {
     Ok(())
 }
 
+mod procman;
+
 #[tokio::main()]
 async fn main() -> io::Result<()> {
-    let cli = Cli::parse();
+    // let cli = Cli::parse();
 
-    init_panic_hook();
+    // init_panic_hook();
 
-    let terminal = ratatui::init();
+    // let terminal = ratatui::init();
 
-    let launch_file = LaunchFile::from_file(&cli.launch_file)?;
+    // let launch_file = LaunchFile::from_file(&cli.launch_file)?;
 
-    let mut supervisor = Supervisor::from_launch_file(launch_file).await;
+    // let mut supervisor = Supervisor::from_launch_file(launch_file).await;
 
-    let app = App::new(&mut supervisor);
-    let result = app.run(terminal).await;
+    // let app = App::new(&mut supervisor);
+    // let result = app.run(terminal).await;
 
-    ratatui::restore();
+    // ratatui::restore();
 
-    result
+    // result
+
+    procman::run().await;
+    Ok(())
 }
